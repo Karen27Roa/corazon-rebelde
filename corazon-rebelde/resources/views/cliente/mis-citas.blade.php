@@ -4,205 +4,197 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Citas - Corazón Rebelde</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Georgia', serif;
-            background: linear-gradient(160deg, #f5f3ff 0%, #ece6fb 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
+            min-height: 100vh; overflow-x: hidden;
+            background:
+                radial-gradient(circle at 8% 0%, #e9defc 0%, transparent 42%),
+                radial-gradient(circle at 92% 25%, #ffe3f3 0%, transparent 38%),
+                linear-gradient(160deg, #f5f3ff 0%, #ece6fb 100%);
+            background-attachment: fixed;
         }
 
-        /* ---------- Corazones y uñas flotando de fondo ---------- */
+        /* ---------- Uñas y corazones flotando ---------- */
         .fondo { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-        .fondo .flota {
-            position: absolute; bottom: -60px; opacity: 0;
-            animation: subir linear infinite;
-        }
-        .fondo .flota > span {
-            display: inline-block;
-            animation: vaiven ease-in-out infinite;
-        }
-        .fondo .combo { position: relative; display: inline-block; line-height: 1; }
-        .fondo .combo .una {
-            position: absolute; top: -.55em; right: -.45em; font-size: .62em;
-            transform: rotate(18deg);
-        }
-        @keyframes subir {
-            0%   { transform: translateY(0); opacity: 0; }
-            10%  { opacity: .75; }
-            90%  { opacity: .5; }
-            100% { transform: translateY(-115vh); opacity: 0; }
-        }
-        @keyframes vaiven {
-            0%, 100% { transform: translateX(-14px) rotate(-14deg); }
-            50%      { transform: translateX(14px) rotate(14deg); }
-        }
+        .flota { position: absolute; bottom: -70px; opacity: 0; animation: subir linear infinite; }
+        .flota > span { display: inline-block; animation: vaiven ease-in-out infinite; filter: drop-shadow(0 4px 6px rgba(107,92,165,.25)); }
+        .combo { position: relative; display: inline-block; line-height: 1; }
+        .combo .una { position: absolute; top: -.55em; right: -.45em; font-size: .62em; transform: rotate(18deg); }
+        @keyframes subir { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: .75; } 90% { opacity: .45; } 100% { transform: translateY(-118vh); opacity: 0; } }
+        @keyframes vaiven { 0%,100% { transform: translateX(-16px) rotate(-16deg); } 50% { transform: translateX(16px) rotate(16deg); } }
 
         /* ---------- Menú ---------- */
         nav {
-            position: relative; z-index: 2;
+            position: relative; z-index: 5;
             background: linear-gradient(135deg, #c9c2ee, #b4aae0);
-            padding: 16px 32px;
-            display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 20px rgba(107,92,165,0.25);
+            padding: 10px 32px; display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px; box-shadow: 0 6px 24px rgba(107,92,165,.3);
         }
-        nav img { width: 130px; border-radius: 8px; }
-        .nav-links { display: flex; align-items: center; gap: 22px; }
-        .nav-links a {
-            color: white; text-decoration: none; font-size: 14px; font-weight: bold;
-            position: relative; transition: transform .2s;
-        }
-        .nav-links a::after {
-            content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px;
-            background: white; transition: width .3s;
-        }
+        .nav-links { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+        .nav-links a { color: white; text-decoration: none; font-size: 14px; font-weight: bold; position: relative; transition: transform .2s; }
+        .nav-links a::after { content: ''; position: absolute; left: 0; bottom: -4px; width: 0; height: 2px; background: white; transition: width .3s; }
         .nav-links a:hover { transform: translateY(-2px); }
         .nav-links a:hover::after { width: 100%; }
         .btn-logout {
-            background: white; color: #6b5ca5; border: none;
-            padding: 10px 22px; border-radius: 25px; font-weight: bold; cursor: pointer;
-            transition: transform .2s, box-shadow .2s;
+            background: white; color: #6b5ca5; border: none; padding: 10px 22px; border-radius: 25px;
+            font-weight: bold; cursor: pointer; font-size: 14px; transition: transform .2s, box-shadow .2s;
         }
         .btn-logout:hover { transform: scale(1.06); box-shadow: 0 6px 16px rgba(107,92,165,.3); }
 
-        /* ---------- Distribución ---------- */
-        .container {
-            position: relative; z-index: 1;
-            max-width: 1100px; margin: 36px auto 60px; padding: 0 20px;
-            display: grid; grid-template-columns: 1fr 360px; gap: 30px; align-items: start;
-        }
-        @media (max-width: 880px) { .container { grid-template-columns: 1fr; } }
+        .container { position: relative; z-index: 2; max-width: 1120px; margin: 0 auto 60px; padding: 0 20px; }
 
-        .alert-success, .alert-error {
-            padding: 14px 20px; border-radius: 14px; margin-bottom: 20px;
-            font-size: 14px; font-weight: bold; animation: entrar .6s ease both;
-        }
+        @keyframes entrar { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+
+        .alert-success, .alert-error { padding: 14px 20px; border-radius: 14px; margin: 26px 0 0; font-size: 14px; font-weight: bold; animation: entrar .6s ease both; }
         .alert-success { background: #d1f5e0; color: #276749; }
         .alert-error   { background: #ffe0e0; color: #c0392b; }
 
-        h2 {
-            color: #6b5ca5; font-size: 26px; font-weight: normal; margin-bottom: 22px;
-            animation: entrar .6s ease both;
+        /* ---------- Banner con el osito ---------- */
+        .banner {
+            position: relative; margin-top: 100px; min-height: 190px;
+            padding: 40px 310px 40px 42px; color: white; border-radius: 30px;
+            background: linear-gradient(135deg, #3f2470 0%, #6a3fb5 55%, #a76bf0 100%);
+            background-size: 200% 200%; animation: entrar .8s ease both, mover 12s ease infinite;
+            box-shadow: 0 20px 48px rgba(91,58,143,.4);
         }
-        h2 .brillo { display: inline-block; animation: girar 4s linear infinite; }
+        @keyframes mover { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        .banner-bg { position: absolute; inset: 0; border-radius: 30px; overflow: hidden; pointer-events: none; }
+        .banner-bg::before, .banner-bg::after { content: ''; position: absolute; border-radius: 50%; background: rgba(255,255,255,.09); animation: respira 9s ease-in-out infinite; }
+        .banner-bg::before { width: 280px; height: 280px; top: -110px; left: -70px; }
+        .banner-bg::after  { width: 200px; height: 200px; bottom: -90px; left: 38%; animation-delay: 3s; }
+        @keyframes respira { 0%,100% { transform: scale(1); } 50% { transform: scale(1.14); } }
+        .estrella { position: absolute; color: #ffe680; text-shadow: 0 0 10px #ffd21f; animation: titila 2.4s ease-in-out infinite; }
+        .e1 { top: 16%; left: 46%; font-size: 20px; } .e2 { bottom: 18%; left: 8%; font-size: 15px; animation-delay: .9s; } .e3 { top: 12%; right: 38%; font-size: 24px; animation-delay: 1.6s; }
+        @keyframes titila { 0%,100% { opacity: .2; transform: scale(.6) rotate(0); } 50% { opacity: 1; transform: scale(1.3) rotate(45deg); } }
+
+        .banner h1 { position: relative; font-family: 'Dancing Script', 'Brush Script MT', cursive; font-size: clamp(2.4rem, 4vw, 3.4rem); font-weight: 700; line-height: 1.05; text-shadow: 0 4px 18px rgba(0,0,0,.3); }
+        .banner h1 span {
+            background: linear-gradient(100deg, #ffd21f, #fff3b0, #ffd21f);
+            -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+        }
+        .banner p { position: relative; margin-top: 10px; font-size: 15px; line-height: 1.6; opacity: .94; max-width: 430px; }
+        .chips { position: relative; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+        .chip { background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.4); backdrop-filter: blur(4px); padding: 8px 15px; border-radius: 30px; font-size: 13px; font-weight: bold; }
+
+        .oso { position: absolute; right: 36px; bottom: -4px; width: 262px; z-index: 3; pointer-events: none; }
+        .oso .glow {
+            position: absolute; inset: -12%; border-radius: 50%; z-index: 0;
+            background: radial-gradient(circle, rgba(255,255,255,.9) 0%, rgba(255,230,250,.5) 42%, transparent 70%);
+            animation: pulso 4s ease-in-out infinite;
+        }
+        @keyframes pulso { 0%,100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.08); opacity: 1; } }
+        .oso img {
+            position: relative; z-index: 1; width: 100%; display: block; transform-origin: 50% 95%;
+            filter: drop-shadow(0 18px 18px rgba(30,15,60,.45)); animation: flotarOso 4s ease-in-out infinite;
+        }
+        @keyframes flotarOso { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-12px) rotate(1.8deg); } }
+        .oso .lat { position: absolute; z-index: 2; animation: subeLat 3s ease-in-out infinite; }
+        .l1 { top: 4%; left: -4%; font-size: 24px; } .l2 { top: -6%; right: 6%; font-size: 20px; animation-delay: 1s; } .l3 { top: 30%; right: -6%; font-size: 18px; animation-delay: 2s; }
+        @keyframes subeLat { 0%,100% { transform: translateY(0) scale(1); opacity: .9; } 50% { transform: translateY(-14px) scale(1.2); opacity: 1; } }
+
+        /* ---------- Columnas ---------- */
+        .cols { display: grid; grid-template-columns: 1fr 370px; gap: 28px; align-items: start; margin-top: 34px; }
+        h2 { color: #6b5ca5; font-size: 24px; font-weight: normal; margin-bottom: 16px; }
+        h2 .brillo-h { display: inline-block; animation: girar 4s linear infinite; }
         @keyframes girar { 0%,100% { transform: rotate(0) scale(1); } 50% { transform: rotate(180deg) scale(1.25); } }
 
-        @keyframes entrar {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ---------- Tarjetas de citas ---------- */
+        /* ---------- Tarjetas de cita ---------- */
         .cita-card {
-            background: white; border-radius: 22px; padding: 24px 28px; margin-bottom: 18px;
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
-            box-shadow: 0 6px 24px rgba(201,194,238,0.35);
-            border-left: 6px solid #c9c2ee;
-            animation: entrar .7s ease both;
-            animation-delay: calc(var(--i) * .15s);
-            transition: transform .3s, box-shadow .3s;
+            display: flex; align-items: center; gap: 20px;
+            background: white; border-radius: 24px; padding: 20px 24px; margin-bottom: 18px;
+            border: 2px solid #f1ebfc; box-shadow: 0 8px 28px rgba(201,194,238,.4);
+            animation: entrar .7s ease both; animation-delay: calc(var(--i) * .15s + .2s);
+            transition: transform .3s, box-shadow .3s, border-color .3s;
         }
-        .cita-card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 14px 34px rgba(168,159,212,0.5); }
-        .cita-info h3 { color: #6b5ca5; font-size: 18px; font-weight: normal; }
-        .cita-info p { color: #8a8a9a; font-size: 13px; margin-top: 6px; }
-        .cita-info .estilista { color: #8b7bc4; font-weight: bold; }
+        .cita-card:hover { transform: translateY(-5px); box-shadow: 0 16px 38px rgba(168,159,212,.55); border-color: #d8cff5; }
 
-        .lado-derecho { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-        .badge { padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; white-space: nowrap; }
-        .pendiente { background: #fff3cd; color: #856404; animation: latido 2.2s ease-in-out infinite; }
-        .completada { background: #d1f5e0; color: #276749; }
-        .cancelada { background: #ffe0e0; color: #c0392b; }
+        .fecha {
+            flex-shrink: 0; width: 82px; text-align: center; border-radius: 20px; overflow: hidden;
+            background: white; box-shadow: 0 8px 20px rgba(139,95,208,.3); border: 2px solid #e6dcf9;
+        }
+        .fecha .mes { display: block; background: linear-gradient(135deg, #8b5fd0, #c08bf0); color: white; font-size: 12px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 0; }
+        .fecha strong { display: block; font-size: 34px; color: #5b3a8f; line-height: 1.15; padding-top: 4px; }
+        .fecha .dow { display: block; color: #9b8ec4; font-size: 12px; text-transform: capitalize; padding-bottom: 7px; }
+
+        .info { flex: 1; min-width: 0; }
+        .info h3 { color: #5b3a8f; font-size: 19px; font-weight: normal; }
+        .info p { color: #8a8a9a; font-size: 13px; margin-top: 6px; }
+        .info .estilista { color: #8b5fd0; font-weight: bold; }
+        .faltan { display: inline-block; margin-top: 9px; background: linear-gradient(135deg, #f8f4ff, #efe9fc); color: #6b3fb0; font-size: 12px; font-weight: bold; padding: 5px 12px; border-radius: 20px; animation: latido 2.4s ease-in-out infinite; }
         @keyframes latido { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
 
-        .btn-agendar, .btn-reagendar, .btn-cancelar {
-            display: inline-block; text-decoration: none; border: none; cursor: pointer;
-            font-weight: bold; border-radius: 20px; padding: 10px 18px; font-size: 12px;
-            font-family: inherit; transition: transform .2s, box-shadow .2s;
+        .acciones { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 120px; }
+        .badge { text-align: center; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; background: #fff3cd; color: #856404; }
+        .btn-reagendar, .btn-cancelar {
+            display: block; text-align: center; text-decoration: none; border: none; cursor: pointer; width: 100%;
+            font-weight: bold; border-radius: 20px; padding: 9px 16px; font-size: 12px; font-family: inherit; transition: transform .2s, box-shadow .2s;
         }
-        .btn-agendar, .btn-reagendar { background: linear-gradient(135deg, #c9c2ee, #a89fd4); color: white; }
-        .btn-cancelar { background: #ffe0e0; color: #c0392b; }
-        .btn-agendar:hover, .btn-reagendar:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(168,159,212,.6); }
-        .btn-cancelar:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(240,128,128,.4); }
-        .btn-agendar { margin-top: 16px; padding: 13px 30px; border-radius: 25px; font-size: 14px; }
+        .btn-reagendar { background: linear-gradient(135deg, #b085ee, #8b5fd0); color: white; }
+        .btn-cancelar { background: #ffe9e9; color: #c0392b; }
+        .btn-reagendar:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(139,95,208,.45); }
+        .btn-cancelar:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(240,128,128,.4); }
 
-        .empty {
-            text-align: center; padding: 50px 30px; color: #9b8ec4;
-            background: white; border-radius: 22px; box-shadow: 0 6px 24px rgba(201,194,238,0.35);
-            animation: entrar .7s ease both;
+        .vacio {
+            text-align: center; padding: 50px 30px; background: white; border-radius: 26px; color: #9b8ec4;
+            box-shadow: 0 10px 30px rgba(201,194,238,.4); animation: entrar .8s ease both .2s;
         }
-        .empty .grande { font-size: 44px; display: inline-block; animation: flotar 3s ease-in-out infinite; }
+        .vacio .grande { font-size: 52px; display: inline-block; animation: flotar 3s ease-in-out infinite; }
         @keyframes flotar { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        /* ---------- Columna derecha ---------- */
-        aside { position: sticky; top: 20px; animation: entrar .8s ease both; animation-delay: .2s; }
-
-        /* Muñeca */
-        .guia { display: flex; align-items: flex-end; gap: 4px; margin-bottom: -6px; position: relative; z-index: 2; }
-        .muneca { width: 130px; flex-shrink: 0; animation: flotar 3.2s ease-in-out infinite; filter: drop-shadow(0 8px 10px rgba(107,92,165,.25)); }
-        .muneca .brazo { transform-origin: 80px 100px; animation: senalar 1.6s ease-in-out infinite; }
-        .muneca .parpado { transform-origin: center; animation: parpadeo 4s infinite; }
-        .muneca .mano-izq { transform-origin: 40px 100px; animation: saludo 2.4s ease-in-out infinite; }
-        @keyframes senalar { 0%,100% { transform: rotate(-10deg); } 50% { transform: rotate(14deg); } }
-        @keyframes saludo { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-8deg); } }
-        @keyframes parpadeo { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
-
-        .burbuja {
-            background: white; color: #6b5ca5; border-radius: 18px 18px 18px 4px;
-            padding: 12px 16px; font-size: 13px; line-height: 1.5; margin-bottom: 40px;
-            box-shadow: 0 6px 18px rgba(201,194,238,.5); position: relative;
-            animation: rebote 3s ease-in-out infinite;
+        .btn-agendar {
+            position: relative; overflow: hidden; display: inline-block; margin-top: 18px; text-decoration: none;
+            background: linear-gradient(135deg, #b085ee, #7a4cc4); color: white; padding: 13px 30px; border-radius: 28px;
+            font-weight: bold; font-size: 14px; box-shadow: 0 8px 22px rgba(122,76,196,.4); transition: transform .25s;
         }
-        @keyframes rebote { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        .btn-agendar::before { content: ''; position: absolute; top: 0; left: -80%; width: 50%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,.7), transparent); transform: skewX(-20deg); animation: brillo 3s ease-in-out infinite; }
+        @keyframes brillo { 0% { left: -80%; } 60%, 100% { left: 140%; } }
+        .btn-agendar:hover { transform: translateY(-3px) scale(1.04); }
 
-        /* Calendario */
-        .cal {
-            background: white; border-radius: 24px; padding: 22px;
-            box-shadow: 0 10px 34px rgba(201,194,238,0.5);
-            border: 2px solid #efe9fc;
+        /* ---------- Calendario ---------- */
+        aside { position: sticky; top: 20px; animation: entrar .8s ease both .3s; }
+        .cal { background: white; border-radius: 26px; padding: 22px; box-shadow: 0 14px 40px rgba(168,159,212,.5); border: 2px solid #efe9fc; }
+        .cal-top {
+            background: linear-gradient(135deg, #8b5fd0, #c08bf0); color: white; border-radius: 18px; padding: 14px 16px; margin-bottom: 14px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .cal-head strong { color: #6b5ca5; font-size: 17px; text-transform: capitalize; }
-        .cal-head button {
-            background: #f3f0fb; color: #6b5ca5; border: none; width: 34px; height: 34px;
-            border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold;
-            transition: transform .2s, background .2s;
-        }
-        .cal-head button:hover { background: #e2d9f8; transform: scale(1.15); }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-        .cal-dow { font-size: 11px; color: #9b8ec4; font-weight: bold; padding-bottom: 4px; }
+        .cal-top strong { font-size: 18px; text-transform: capitalize; font-weight: normal; letter-spacing: .5px; }
+        .cal-top button { background: rgba(255,255,255,.25); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; font-weight: bold; transition: transform .2s, background .2s; }
+        .cal-top button:hover { background: rgba(255,255,255,.45); transform: scale(1.15); }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+        .dow-h { font-size: 11px; color: #9b8ec4; font-weight: bold; padding-bottom: 4px; }
         .dia {
             position: relative; height: 46px; border-radius: 12px; font-size: 13px; color: #555;
-            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px;
-            background: transparent; border: none; font-family: inherit;
+            display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; background: transparent; border: none; font-family: inherit;
         }
-        .dia.vacio-dia { visibility: hidden; }
-        .dia.hoy { background: #f3f0fb; color: #6b5ca5; font-weight: bold; }
-        .dia.con-cita { background: #f8f4ff; cursor: pointer; color: #6b5ca5; font-weight: bold; transition: transform .2s, background .2s; }
-        .dia.con-cita:hover { transform: scale(1.12); background: #e8e1fb; }
-        .dia.activo { background: #e8e1fb; box-shadow: 0 0 0 2px #c9c2ee; }
-        .dia .corazon {
-            position: absolute; top: 2px; left: 50%; font-size: 16px; line-height: 1;
-            transform: translateX(-50%); animation: corazon 1.4s ease-in-out infinite;
-        }
-        @keyframes corazon { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.3); } }
-
-        .nota {
-            margin-top: 16px; background: linear-gradient(135deg, #f8f4ff, #efe9fc);
-            border-radius: 16px; padding: 14px 16px; color: #6b5ca5; font-size: 13px; line-height: 1.7; min-height: 64px;
-            animation: entrar .5s ease both;
-        }
+        .dia.off { visibility: hidden; }
+        .dia.hoy { background: #f3f0fb; color: #6b5ca5; font-weight: bold; box-shadow: inset 0 0 0 2px #c9c2ee; }
+        .dia.con { background: #f8f4ff; color: #6b5ca5; font-weight: bold; cursor: pointer; transition: transform .2s, background .2s; }
+        .dia.con:hover { transform: scale(1.14); background: #e8e1fb; }
+        .dia.activo { background: #e8e1fb; box-shadow: 0 0 0 2px #a89fd4; }
+        .dia .cor { position: absolute; top: 2px; left: 50%; font-size: 17px; line-height: 1; transform: translateX(-50%); animation: cor 1.4s ease-in-out infinite; }
+        @keyframes cor { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.3); } }
+        .nota { margin-top: 14px; background: linear-gradient(135deg, #f8f4ff, #efe9fc); border-radius: 16px; padding: 14px 16px; color: #6b5ca5; font-size: 13px; line-height: 1.7; min-height: 62px; animation: entrar .5s ease both; }
         .nota.sin { color: #9b8ec4; text-align: center; }
 
-        @media (max-width: 700px) {
-            .cita-card { flex-direction: column; align-items: flex-start; }
-            .lado-derecho { width: 100%; justify-content: flex-start; }
+        /* ---------- Tablet y celular ---------- */
+        @media (max-width: 960px) {
+            .cols { grid-template-columns: 1fr; }
+            aside { position: static; }
+            .banner { margin-top: 150px; padding: 112px 24px 28px; text-align: center; }
+            .banner p { margin-left: auto; margin-right: auto; }
+            .chips { justify-content: center; }
+            .oso { right: auto; left: 50%; bottom: auto; top: -138px; width: 200px; transform: translateX(-50%); }
         }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation: none !important; transition: none !important; }
+        @media (max-width: 640px) {
+            .cita-card { flex-wrap: wrap; }
+            .acciones { flex-direction: row; flex-wrap: wrap; width: 100%; }
+            .acciones > * { flex: 1; }
         }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
     </style>
 </head>
 <body>
@@ -223,41 +215,64 @@
 
 <div class="container">
 
-    {{-- ===== Columna izquierda: citas ===== --}}
-    <div>
-        @if(session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
+    @if(session('success'))
+        <div class="alert-success">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+        <div class="alert-error">{{ $errors->first() }}</div>
+    @endif
 
-        @if($errors->any())
-            <div class="alert-error">{{ $errors->first() }}</div>
-        @endif
+    {{-- ===== Banner con el osito ===== --}}
+    <section class="banner">
+        <div class="banner-bg"></div>
+        <span class="estrella e1" style="position:absolute">✦</span>
+        <span class="estrella e2" style="position:absolute">✦</span>
+        <span class="estrella e3" style="position:absolute">✦</span>
 
-        <h2><span class="brillo">✦</span> Mis citas</h2>
+        <h1>Mis <span>citas</span> 💜</h1>
+        <p>Aquí ves tus próximas citas. Puedes reagendar o cancelar cuando lo necesites.</p>
 
-        @if($citas->isEmpty())
-            <div class="empty">
-                <div class="grande">💜</div>
-                <p style="margin-top:10px;">No tienes citas pendientes</p>
-                <a href="{{ route('citas.create') }}" class="btn-agendar">✦ Agendar una cita</a>
-            </div>
-        @else
-            @foreach($citas as $cita)
+        <div class="chips">
+            <span class="chip">📅 {{ $citas->count() }} {{ $citas->count() === 1 ? 'cita próxima' : 'citas próximas' }}</span>
+            @if($citas->first())
+                <span class="chip">✨ Siguiente: {{ $citas->first()->inicio->translatedFormat('d M') }} · {{ $citas->first()->inicio->format('h:i A') }}</span>
+            @endif
+        </div>
+
+        <div class="oso">
+            <div class="glow"></div>
+            <img src="{{ asset('mascota/osito-citas.png') }}" alt="Osito de Corazón Rebelde con el letrero: mira tus citas aquí">
+            <span class="lat l1">💜</span><span class="lat l2">✨</span><span class="lat l3">💅</span>
+        </div>
+    </section>
+
+    <div class="cols">
+
+        {{-- ===== Lista de citas ===== --}}
+        <div>
+            <h2><span class="brillo-h">✦</span> Próximas citas</h2>
+
+            @forelse($citas as $cita)
                 <div class="cita-card" style="--i: {{ $loop->index }}">
-                    <div class="cita-info">
+                    <div class="fecha">
+                        <span class="mes">{{ $cita->inicio->translatedFormat('M') }}</span>
+                        <strong>{{ $cita->inicio->format('d') }}</strong>
+                        <span class="dow">{{ $cita->inicio->translatedFormat('D') }}</span>
+                    </div>
+
+                    <div class="info">
                         <h3>{{ $cita->servicio->nombre }}</h3>
-                        <p>📅 {{ $cita->inicio->format('d/m/Y') }} &nbsp;—&nbsp; 🕐 {{ $cita->inicio->format('h:i A') }}</p>
+                        <p>🕐 {{ $cita->inicio->format('h:i A') }}</p>
                         <p>💅 <span class="estilista">{{ $cita->especialista->user->name }}</span></p>
                         @if($cita->notas)
                             <p>📝 {{ $cita->notas }}</p>
                         @endif
+                        <span class="faltan" data-fecha="{{ $cita->inicio->format('Y-m-d\TH:i:s') }}">⏳ …</span>
                     </div>
 
-                    <div class="lado-derecho">
-                        <span class="badge pendiente">Pendiente</span>
-
+                    <div class="acciones">
+                        <span class="badge">Pendiente</span>
                         <a href="{{ route('citas.edit', $cita) }}" class="btn-reagendar">Reagendar</a>
-
                         <form method="POST" action="{{ route('citas.cancelar', $cita) }}"
                               onsubmit="return confirm('¿Seguro que deseas cancelar esta cita?')">
                             @csrf
@@ -266,186 +281,118 @@
                         </form>
                     </div>
                 </div>
-            @endforeach
-        @endif
+            @empty
+                <div class="vacio">
+                    <div class="grande">💅</div>
+                    <p style="margin-top:10px;">Aún no tienes citas pendientes.<br>¡Es momento de consentirte! 💜</p>
+                    <a href="{{ route('citas.create') }}" class="btn-agendar">✦ Agendar una cita</a>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- ===== Calendario ===== --}}
+        <aside>
+            <div class="cal">
+                <div class="cal-top">
+                    <button type="button" id="prev">‹</button>
+                    <strong id="titulo"></strong>
+                    <button type="button" id="next">›</button>
+                </div>
+                <div class="grid" id="grid"></div>
+                <div class="nota sin" id="nota">Toca un día con 💜 para ver el recordatorio de tu cita.</div>
+            </div>
+        </aside>
     </div>
-
-    {{-- ===== Columna derecha: muñeca + calendario ===== --}}
-    <aside>
-        <div class="guia">
-            {{-- Muñeca animada (SVG) --}}
-            <svg class="muneca" viewBox="0 0 130 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <!-- pelo atrás -->
-                <ellipse cx="65" cy="58" rx="38" ry="42" fill="#6b5ca5"/>
-                <!-- vestido -->
-                <path d="M32 170 Q38 100 65 94 Q92 100 98 170 Z" fill="#c9c2ee"/>
-                <path d="M52 100 Q65 112 78 100" stroke="#a89fd4" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <text x="56" y="140" font-size="18">💜</text>
-                <!-- brazo izquierdo saludando -->
-                <g class="mano-izq">
-                    <path d="M42 104 Q24 112 20 90" stroke="#ffe0cf" stroke-width="9" fill="none" stroke-linecap="round"/>
-                    <circle cx="20" cy="86" r="7" fill="#ffe0cf"/>
-                </g>
-                <!-- brazo derecho señalando -->
-                <g class="brazo">
-                    <path d="M82 104 L116 138" stroke="#ffe0cf" stroke-width="9" stroke-linecap="round"/>
-                    <circle cx="118" cy="141" r="7" fill="#ffe0cf"/>
-                    <circle cx="118" cy="141" r="11" fill="none" stroke="#f9a8d4" stroke-width="2" opacity=".7"/>
-                </g>
-                <!-- cabeza -->
-                <circle cx="65" cy="62" r="28" fill="#ffe3d4"/>
-                <!-- flequillo -->
-                <path d="M37 58 Q42 30 65 32 Q88 30 93 58 Q80 44 65 46 Q50 44 37 58 Z" fill="#6b5ca5"/>
-                <!-- moño de corazón -->
-                <text x="76" y="36" font-size="16">💗</text>
-                <!-- ojos -->
-                <g class="parpado">
-                    <ellipse cx="54" cy="64" rx="3.5" ry="5" fill="#3b2f63"/>
-                    <ellipse cx="76" cy="64" rx="3.5" ry="5" fill="#3b2f63"/>
-                    <circle cx="55.2" cy="62" r="1.2" fill="white"/>
-                    <circle cx="77.2" cy="62" r="1.2" fill="white"/>
-                </g>
-                <!-- mejillas y sonrisa -->
-                <circle cx="47" cy="75" r="5" fill="#ffb3c6" opacity=".7"/>
-                <circle cx="83" cy="75" r="5" fill="#ffb3c6" opacity=".7"/>
-                <path d="M58 78 Q65 86 72 78" stroke="#c0568a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            </svg>
-
-            <div class="burbuja">
-                @if($citas->isEmpty())
-                    ¡Hola! 💜 Aún no tienes citas. ¡Agenda la primera y aparecerá aquí en tu calendario!
-                @else
-                    ¡Mira aquí abajo! 👇 Toca los 💜 de tu calendario para ver el recordatorio de tu cita.
-                @endif
-            </div>
-        </div>
-
-        <div class="cal">
-            <div class="cal-head">
-                <button type="button" id="prev">‹</button>
-                <strong id="titulo"></strong>
-                <button type="button" id="next">›</button>
-            </div>
-            <div class="cal-grid" id="grid"></div>
-            <div class="nota sin" id="nota">Toca un día con 💜 para ver el recordatorio de tu cita.</div>
-        </div>
-    </aside>
 </div>
 
 <script>
-    /* ---------- Corazones y uñas flotando ---------- */
+    /* ---------- Uñas y corazones flotando ---------- */
     (function () {
         const fondo = document.getElementById('fondo');
         const corazones = ['💜', '💗', '💖', '🤍'];
-        const total = 24; // cantidad de elementos flotando
-
-        for (let i = 0; i < total; i++) {
+        for (let i = 0; i < 20; i++) {
             const flota = document.createElement('div');
             flota.className = 'flota';
-
             const interior = document.createElement('span');
-            const tipo = Math.random();
-            const corazon = corazones[Math.floor(Math.random() * corazones.length)];
-
-            if (tipo < 0.4) {
-                // Corazón con uña encima
-                interior.innerHTML = `<span class="combo">${corazon}<span class="una">💅</span></span>`;
-            } else if (tipo < 0.7) {
-                // Solo uñas
-                interior.textContent = '💅';
-            } else {
-                // Solo corazón
-                interior.textContent = corazon;
-            }
+            const t = Math.random();
+            const c = corazones[Math.floor(Math.random() * corazones.length)];
+            if (t < 0.45)      interior.textContent = '💅';
+            else if (t < 0.7)  interior.innerHTML = `<span class="combo">${c}<span class="una">💅</span></span>`;
+            else               interior.textContent = c;
 
             flota.style.left = Math.random() * 100 + '%';
-            flota.style.fontSize = (16 + Math.random() * 26) + 'px';
+            flota.style.fontSize = (16 + Math.random() * 24) + 'px';
             flota.style.animationDuration = (11 + Math.random() * 14) + 's';
             flota.style.animationDelay = (-Math.random() * 25) + 's';
-
             interior.style.animationDuration = (3 + Math.random() * 3) + 's';
             interior.style.animationDelay = (-Math.random() * 4) + 's';
-
             flota.appendChild(interior);
             fondo.appendChild(flota);
         }
     })();
 
+    /* ---------- "Faltan X días" ---------- */
+    document.querySelectorAll('.faltan').forEach(el => {
+        const destino = new Date(el.dataset.fecha);
+        const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+        const dia = new Date(destino); dia.setHours(0, 0, 0, 0);
+        const dias = Math.round((dia - hoy) / 86400000);
+        el.textContent = dias <= 0 ? '⏳ ¡Es hoy! Te esperamos' : dias === 1 ? '⏳ Es mañana' : `⏳ Faltan ${dias} días`;
+    });
+
     /* ---------- Calendario ---------- */
     const eventos = @json($eventos ?? []);
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-    const dows  = ['L','M','M','J','V','S','D'];
-
+    const dows = ['L','M','M','J','V','S','D'];
     const grid = document.getElementById('grid');
     const titulo = document.getElementById('titulo');
     const nota = document.getElementById('nota');
-
     const pad = n => String(n).padStart(2, '0');
     const key = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
     const base = eventos.length ? new Date(eventos[0].fecha + 'T00:00:00') : new Date();
-    let anio = base.getFullYear();
-    let mes  = base.getMonth();
-    let seleccionado = eventos.length ? eventos[0].fecha : null;
-
-    function textoNota(fecha) {
-        const lista = eventos.filter(e => e.fecha === fecha);
-        if (!lista.length) return null;
-        const d = new Date(fecha + 'T00:00:00');
-        const dia = `${d.getDate()} de ${meses[d.getMonth()]}`;
-        return lista.map(e =>
-            `💜 Recuerda tu cita para el día <strong>${dia}</strong> a las <strong>${e.hora}</strong> con <strong>${e.estilista}</strong>. ¡No faltes, te esperamos! 💜`
-        ).join('<br><br>');
-    }
+    let anio = base.getFullYear(), mes = base.getMonth();
+    let sel = eventos.length ? eventos[0].fecha : null;
 
     function mostrarNota() {
-        const t = seleccionado ? textoNota(seleccionado) : null;
+        const lista = sel ? eventos.filter(e => e.fecha === sel) : [];
         nota.style.animation = 'none'; nota.offsetHeight; nota.style.animation = '';
-        if (t) { nota.className = 'nota'; nota.innerHTML = t; }
-        else   { nota.className = 'nota sin'; nota.innerHTML = 'Toca un día con 💜 para ver el recordatorio de tu cita.'; }
+        if (!lista.length) { nota.className = 'nota sin'; nota.innerHTML = 'Toca un día con 💜 para ver el recordatorio de tu cita.'; return; }
+        const d = new Date(sel + 'T00:00:00');
+        const dia = `${d.getDate()} de ${meses[d.getMonth()]}`;
+        nota.className = 'nota';
+        nota.innerHTML = lista.map(e =>
+            `💜 Recuerda tu cita para el día <strong>${dia}</strong> a las <strong>${e.hora}</strong> con <strong>${e.estilista}</strong>. ¡No faltes, te esperamos! 💜`
+        ).join('<br><br>');
     }
 
     function dibujar() {
         titulo.textContent = `${meses[mes]} ${anio}`;
         grid.innerHTML = '';
+        dows.forEach(x => { const e = document.createElement('div'); e.className = 'dow-h'; e.textContent = x; grid.appendChild(e); });
 
-        dows.forEach(d => {
-            const el = document.createElement('div');
-            el.className = 'cal-dow';
-            el.textContent = d;
-            grid.appendChild(el);
-        });
-
-        const primerDia = (new Date(anio, mes, 1).getDay() + 6) % 7;
-        const diasMes = new Date(anio, mes + 1, 0).getDate();
+        const primero = (new Date(anio, mes, 1).getDay() + 6) % 7;
+        const total = new Date(anio, mes + 1, 0).getDate();
         const hoy = new Date();
-        const hoyKey = key(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        const hoyK = key(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
 
-        for (let i = 0; i < primerDia; i++) {
-            const v = document.createElement('div');
-            v.className = 'dia vacio-dia';
-            grid.appendChild(v);
-        }
+        for (let i = 0; i < primero; i++) { const v = document.createElement('div'); v.className = 'dia off'; grid.appendChild(v); }
 
-        for (let d = 1; d <= diasMes; d++) {
+        for (let d = 1; d <= total; d++) {
             const k = key(anio, mes, d);
             const tiene = eventos.some(e => e.fecha === k);
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'dia' + (k === hoyKey ? ' hoy' : '') + (tiene ? ' con-cita' : '') + (k === seleccionado ? ' activo' : '');
-            btn.innerHTML = (tiene ? '<span class="corazon">💜</span>' : '') + d;
-            if (tiene) {
-                btn.addEventListener('click', () => { seleccionado = k; dibujar(); mostrarNota(); });
-            }
-            grid.appendChild(btn);
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'dia' + (k === hoyK ? ' hoy' : '') + (tiene ? ' con' : '') + (k === sel ? ' activo' : '');
+            b.innerHTML = (tiene ? '<span class="cor">💜</span>' : '') + d;
+            if (tiene) b.addEventListener('click', () => { sel = k; dibujar(); mostrarNota(); });
+            grid.appendChild(b);
         }
     }
 
     document.getElementById('prev').addEventListener('click', () => { mes--; if (mes < 0) { mes = 11; anio--; } dibujar(); });
     document.getElementById('next').addEventListener('click', () => { mes++; if (mes > 11) { mes = 0; anio++; } dibujar(); });
-
-    dibujar();
-    mostrarNota();
+    dibujar(); mostrarNota();
 </script>
 </body>
 </html>

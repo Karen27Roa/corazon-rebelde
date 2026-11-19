@@ -65,6 +65,7 @@
         <a href="{{ route('admin.dashboard') }}">✦ Dashboard</a>
         <a href="{{ route('admin.servicios') }}">✦ Servicios</a>
         <a href="{{ route('admin.especialistas') }}">✦ Especialistas</a>
+        <a href="{{ route('admin.clientes') }}">✦ Clientes</a>
         <a href="{{ route('admin.citas') }}">✦ Citas</a>
         <a href="{{ route('admin.galeria') }}">✦ Galería</a>
         <form method="POST" action="{{ route('logout') }}">

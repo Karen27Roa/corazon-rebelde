@@ -7,44 +7,62 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    public function enviarPlantilla(?string $telefono, string $plantilla, array $parametros): void
+    /**
+     * Envía un WhatsApp de texto libre a través del servicio Node (whatsapp-web.js).
+     *
+     * Nunca lanza excepciones: si falla, deja el error en storage/logs/laravel.log
+     * y devuelve false, para no tumbar el agendamiento de la cita.
+     */
+    public function enviar(?string $telefono, string $mensaje): bool
     {
-        // Si no hay teléfono o no hay token configurado, se salta WhatsApp sin dar error
-        if (!$telefono || !config('services.whatsapp.token')) {
-            return;
+        $numero = $this->normalizar($telefono);
+
+        if (!$numero) {
+            Log::warning('WhatsApp no enviado: teléfono vacío o inválido.');
+            return false;
         }
 
         try {
-            $response = Http::withToken(config('services.whatsapp.token'))
-                ->post('https://graph.facebook.com/v20.0/' . config('services.whatsapp.phone_id') . '/messages', [
-                    'messaging_product' => 'whatsapp',
-                    'to'   => $this->normalizar($telefono),
-                    'type' => 'template',
-                    'template' => [
-                        'name'     => $plantilla,
-                        'language' => ['code' => 'es'],
-                        'components' => [[
-                            'type' => 'body',
-                            'parameters' => array_map(
-                                fn ($p) => ['type' => 'text', 'text' => (string) $p],
-                                $parametros
-                            ),
-                        ]],
-                    ],
+            $respuesta = Http::withHeaders(['x-token' => config('services.whatsapp.token')])
+                ->timeout(10)
+                ->post(rtrim(config('services.whatsapp.url'), '/') . '/enviar', [
+                    'numero'  => $numero,
+                    'mensaje' => $mensaje,
                 ]);
 
-            if ($response->failed()) {
-                Log::error('WhatsApp error: ' . $response->body());
+            if (!$respuesta->successful()) {
+                Log::error("WhatsApp falló ({$numero}): " . $respuesta->body());
+                return false;
             }
+
+            return true;
         } catch (\Throwable $e) {
-            Log::error('WhatsApp excepción: ' . $e->getMessage());
+            Log::error("Error enviando WhatsApp a {$numero}: " . $e->getMessage());
+            return false;
         }
     }
 
-    // Deja solo números y agrega 57 (Colombia) si vienen 10 dígitos
-    private function normalizar(string $telefono): string
+    /**
+     * Deja el teléfono solo con dígitos y con indicativo: 573112340072
+     * (el servicio Node lo necesita sin el signo +).
+     */
+    private function normalizar(?string $telefono): ?string
     {
-        $n = preg_replace('/\D/', '', $telefono);
-        return strlen($n) === 10 ? '57' . $n : $n;
+        if (!$telefono) {
+            return null;
+        }
+
+        $limpio = preg_replace('/\D/', '', $telefono);
+
+        if ($limpio === '') {
+            return null;
+        }
+
+        // Celular colombiano de 10 dígitos (3XXXXXXXXX)
+        if (strlen($limpio) === 10 && str_starts_with($limpio, '3')) {
+            return '57' . $limpio;
+        }
+
+        return $limpio;
     }
 }

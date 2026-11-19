@@ -25,12 +25,21 @@ class CitaController extends Controller
 
     public function store(Request $request, CitaNotificador $notificador)
     {
+        // Deja el celular solo con dígitos (quita espacios y guiones)
+        if ($request->filled('telefono')) {
+            $request->merge(['telefono' => preg_replace('/\D/', '', $request->telefono)]);
+        }
+
         $request->validate([
             'servicio_id'     => 'required|exists:servicios,id',
             'especialista_id' => 'required|exists:especialistas,id',
             'fecha'           => 'required|date|after_or_equal:today',
             'hora'            => 'required',
             'notas'           => 'nullable|string|max:300',
+            'telefono'        => ['required', 'regex:/^3\d{9}$/'],
+        ], [
+            'telefono.required' => 'Escribe tu celular para enviarte la confirmación por WhatsApp.',
+            'telefono.regex'    => 'Escribe un celular válido de 10 dígitos, por ejemplo 3001234567.',
         ]);
 
         // 🔒 Validar que no esté ocupada esa hora con esa especialista
@@ -47,6 +56,9 @@ class CitaController extends Controller
                 ])
                 ->withInput();
         }
+
+        // 📱 Guardar el celular en el usuario (para WhatsApp y próximas citas)
+        auth()->user()->update(['telefono' => $request->telefono]);
 
         // 💾 Crear cita
         $cita = Cita::create([
@@ -75,7 +87,7 @@ class CitaController extends Controller
         return redirect()->route('citas.mias')->with('success', '¡Cita agendada con éxito! 💜');
     }
 
-    // ✅ CAMBIADO: solo citas pendientes que aún no pasaron + datos del calendario
+    // ✅ Solo citas pendientes que aún no pasaron + datos del calendario
     public function misCitas()
     {
         $citas = Cita::where('user_id', auth()->id())
@@ -166,8 +178,8 @@ class CitaController extends Controller
             'google_event_id' => null,
         ]);
 
-        // 🔔 Nuevo correo, evento de calendario y WhatsApp
-        $notificador->citaAgendada($cita->fresh());
+        // 🔔 Nuevo correo, evento de calendario y WhatsApp (marcado como reagendamiento)
+        $notificador->citaAgendada($cita->fresh(), true);
 
         return redirect()->route('citas.mias')->with('success', '¡Cita reagendada con éxito! 💜');
     }
@@ -188,7 +200,7 @@ class CitaController extends Controller
             'estado' => 'cancelada',
         ]);
 
-        // 🔔 Borra el evento del calendario y avisa a la estilista
+        // 🔔 Borra el evento del calendario y avisa a la estilista y a la clienta
         $notificador->citaCancelada($cita);
 
         return redirect()->route('citas.mias')->with('success', 'Cita cancelada con éxito.');

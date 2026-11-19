@@ -122,6 +122,7 @@
         .form-group:nth-of-type(2) { animation-delay: .35s; }
         .form-group:nth-of-type(3) { animation-delay: .45s; }
         .form-group:nth-of-type(4) { animation-delay: .55s; }
+        .form-group:nth-of-type(5) { animation-delay: .65s; }
 
         label { display: block; color: #6b5ca5; font-size: 13px; font-weight: bold; margin-bottom: 6px; }
 
@@ -137,6 +138,9 @@
             box-shadow: 0 0 0 4px rgba(176,133,238,.25);
         }
         textarea { resize: vertical; height: 80px; }
+
+        .ayuda-tel { color: #9b8ec4; font-size: 12px; display: block; margin-top: 6px; }
+        .campo-error { color: #c0392b; font-size: 12px; margin-top: 6px; }
 
         .btn {
             position: relative; overflow: hidden;
@@ -215,7 +219,7 @@
                 <select name="servicio_id" required>
                     <option value="">Selecciona un servicio</option>
                     @foreach($servicios as $servicio)
-                        <option value="{{ $servicio->id }}">
+                        <option value="{{ $servicio->id }}" {{ old('servicio_id') == $servicio->id ? 'selected' : '' }}>
                             {{ $servicio->nombre }} — ${{ number_format($servicio->precio, 0, ',', '.') }}
                         </option>
                     @endforeach
@@ -227,7 +231,7 @@
                 <select name="especialista_id" id="especialista_id" required>
                     <option value="">Selecciona una especialista</option>
                     @foreach($especialistas as $especialista)
-                        <option value="{{ $especialista->id }}">
+                        <option value="{{ $especialista->id }}" {{ old('especialista_id') == $especialista->id ? 'selected' : '' }}>
                             {{ $especialista->user->name }}
                         </option>
                     @endforeach
@@ -236,7 +240,7 @@
 
             <div class="form-group">
                 <label>📅 Fecha</label>
-                <input type="date" name="fecha" id="fecha" min="{{ date('Y-m-d') }}" required>
+                <input type="date" name="fecha" id="fecha" min="{{ date('Y-m-d') }}" value="{{ old('fecha') }}" required>
             </div>
 
             <div class="form-group">
@@ -253,6 +257,20 @@
                 <div class="hora-ocupada-msg" id="hora-error">
                     ⚠️ Esta hora ya está ocupada, por favor elige otra.
                 </div>
+            </div>
+
+            {{-- Celular para la confirmación por WhatsApp --}}
+            <div class="form-group">
+                <label>📱 Celular (WhatsApp)</label>
+                <input type="tel" name="telefono" id="telefono"
+                       value="{{ old('telefono', auth()->user()->telefono) }}"
+                       placeholder="3001234567" maxlength="10"
+                       inputmode="numeric" pattern="3[0-9]{9}"
+                       title="Celular de 10 dígitos que empieza por 3" required>
+                <small class="ayuda-tel">💬 Te enviaremos la confirmación de tu cita por WhatsApp.</small>
+                @error('telefono')
+                    <div class="campo-error">{{ $message }}</div>
+                @enderror
             </div>
 
             <button type="submit" class="btn" id="btn-submit">✦ Agendar cita</button>
@@ -381,6 +399,11 @@
     especialistaSelect.addEventListener('change', cargarHoras);
     fechaInput.addEventListener('change', cargarHoras);
     selectHora.addEventListener('change', validarHoraSeleccionada);
+
+    /* ---------- El celular solo acepta números ---------- */
+    document.getElementById('telefono').addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
 </script>
 </body>
 </html>

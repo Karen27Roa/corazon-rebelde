@@ -118,6 +118,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/citas', [AdminController::class, 'citas'])->name('admin.citas');
         Route::patch('/admin/citas/{cita}/estado', [AdminController::class, 'updateEstadoCita'])->name('admin.citas.estado');
         Route::delete('/admin/citas/{cita}', [AdminController::class, 'destroyCita'])->name('admin.citas.destroy');
+
+        // 🆕 Clientes (listado para la administradora)
+        Route::get('/admin/clientes', [AdminController::class, 'clientes'])->name('admin.clientes');
     });
 });
 

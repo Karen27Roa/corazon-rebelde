@@ -29,6 +29,26 @@ class AdminController extends Controller
         ));
     }
 
+    // ── Clientes ──
+
+    public function clientes()
+    {
+        $clientes = User::where('role', 'cliente')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        // Cantidad de citas por cliente (sin necesitar relación en el modelo User)
+        $conteo = Cita::selectRaw('user_id, COUNT(*) as total')
+                      ->groupBy('user_id')
+                      ->pluck('total', 'user_id');
+
+        $clientes->each(function ($cliente) use ($conteo) {
+            $cliente->citas_count = $conteo[$cliente->id] ?? 0;
+        });
+
+        return view('admin.clientes', compact('clientes'));
+    }
+
     public function servicios()
     {
         $servicios = Servicio::all();

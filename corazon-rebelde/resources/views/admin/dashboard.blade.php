@@ -39,6 +39,18 @@
             text-align: center; box-shadow: 0 4px 15px rgba(201,194,238,0.2);
             border-top: 4px solid #c9c2ee;
         }
+        /* 🆕 Tarjetas clicables */
+        a.stat-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+        }
+        a.stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(109, 82, 168, .25);
+        }
         .stat-card .numero { font-size: 36px; font-weight: bold; color: #6b5ca5; }
         .stat-card .label { color: #888; font-size: 13px; margin-top: 6px; }
         .stat-card .icono { font-size: 28px; margin-bottom: 8px; }
@@ -92,6 +104,7 @@
         <a href="{{ route('admin.dashboard') }}">✦ Dashboard</a>
         <a href="{{ route('admin.servicios') }}">✦ Servicios</a>
         <a href="{{ route('admin.especialistas') }}">✦ Especialistas</a>
+        <a href="{{ route('admin.clientes') }}">✦ Clientes</a>
         <a href="{{ route('admin.citas') }}">✦ Citas</a>
         <a href="{{ route('admin.galeria') }}">✦ Galería</a>
         <form method="POST" action="{{ route('logout') }}">
@@ -108,26 +121,26 @@
     </div>
 
     <div class="stats">
-        <div class="stat-card">
+        <a href="{{ route('admin.citas') }}" class="stat-card">
             <div class="icono">📅</div>
             <div class="numero">{{ $totalCitas }}</div>
             <div class="label">Total Citas</div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a href="{{ route('admin.clientes') }}" class="stat-card">
             <div class="icono">👥</div>
             <div class="numero">{{ $totalClientes }}</div>
             <div class="label">Clientes</div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a href="{{ route('admin.especialistas') }}" class="stat-card">
             <div class="icono">💅</div>
             <div class="numero">{{ $totalEspecialistas }}</div>
             <div class="label">Especialistas</div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a href="{{ route('admin.servicios') }}" class="stat-card">
             <div class="icono">✨</div>
             <div class="numero">{{ $totalServicios }}</div>
             <div class="label">Servicios</div>
-        </div>
+        </a>
     </div>
 
     <h2 class="section-title">✦ Accesos rápidos</h2>

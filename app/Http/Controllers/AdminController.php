@@ -8,12 +8,14 @@ use App\Models\Especialista;
 use App\Models\Cita;
 use App\Models\User;
 use App\Models\Galeria;
+use App\Models\ListaEspera;
+use App\Services\MetricasService;
 use App\Services\CitaNotificador;
 use App\Services\GoogleCalendarService;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(MetricasService $metricas)
     {
         $totalCitas = Cita::count();
         $totalClientes = User::where('role', 'cliente')->count();
@@ -23,9 +25,20 @@ class AdminController extends Controller
                               ->orderBy('created_at', 'desc')
                               ->take(5)->get();
 
+        // 📊 Indicadores del negocio y datos de las gráficas
+        $resumen = $metricas->resumen();
+
+        // ⏳ Clientas que esperan un cupo
+        $listaEspera = ListaEspera::activas()
+            ->with(['user', 'servicio', 'especialista.user'])
+            ->orderBy('fecha')
+            ->orderBy('created_at')
+            ->take(8)
+            ->get();
+
         return view('admin.dashboard', compact(
             'totalCitas', 'totalClientes', 'totalEspecialistas',
-            'totalServicios', 'citasRecientes'
+            'totalServicios', 'citasRecientes', 'resumen', 'listaEspera'
         ));
     }
 

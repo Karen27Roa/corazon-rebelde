@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Corazón Rebelde</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/dashboard.js'])
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Georgia', serif; background: #f5f3ff; min-height: 100vh; }
@@ -92,6 +92,42 @@
         }
         .ver-todas:hover { text-decoration: underline; }
 
+        /* ── 📊 Indicadores (KPIs) ── */
+        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .kpi {
+            background: white; border-radius: 16px; padding: 20px 22px;
+            box-shadow: 0 4px 15px rgba(201,194,238,0.2); border-left: 5px solid #8b7bc4;
+        }
+        .kpi .titulo { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+        .kpi .valor { color: #4a3a80; font-size: 28px; font-weight: bold; margin-top: 6px; }
+        .kpi .detalle { font-size: 12px; margin-top: 6px; color: #999; }
+        .kpi .sube { color: #276749; font-weight: bold; }
+        .kpi .baja { color: #c0392b; font-weight: bold; }
+        .kpi.verde { border-left-color: #48bb78; }
+        .kpi.rojo { border-left-color: #f56565; }
+        .kpi.amarillo { border-left-color: #ecc94b; }
+        .kpi.azul { border-left-color: #4299e1; }
+
+        .graficas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; }
+        .grafica {
+            background: white; border-radius: 16px; padding: 20px 22px;
+            box-shadow: 0 4px 15px rgba(201,194,238,0.2);
+        }
+        .grafica h3 { color: #6b5ca5; font-size: 15px; margin-bottom: 4px; }
+        .grafica p { color: #aaa; font-size: 12px; margin-bottom: 14px; }
+        .grafica .lienzo { position: relative; height: 240px; }
+        .grafica.ancha { grid-column: span 2; }
+        .sin-datos { color: #bbb; text-align: center; padding: 80px 0; font-size: 13px; }
+
+        .espera { background: #e0ecff; color: #1d4ed8; }
+        .esperando { background: #fff3cd; color: #856404; }
+        .notificada { background: #e0ecff; color: #1d4ed8; }
+
+        @media (max-width: 900px) {
+            .kpis { grid-template-columns: repeat(2, 1fr); }
+            .graficas { grid-template-columns: 1fr; }
+            .grafica.ancha { grid-column: auto; }
+        }
         @media (max-width: 800px) {
             .stats, .accesos { grid-template-columns: repeat(2, 1fr); }
         }
@@ -142,6 +178,126 @@
             <div class="label">Servicios</div>
         </a>
     </div>
+
+    {{-- ═══════════ 📊 INDICADORES DEL NEGOCIO ═══════════ --}}
+    @php
+        $k = $resumen['kpis'];
+        $flecha = function ($v) {
+            if ($v === null) return '<span>Sin datos del mes anterior</span>';
+            $clase = $v >= 0 ? 'sube' : 'baja';
+            $signo = $v >= 0 ? '▲' : '▼';
+            return "<span class=\"{$clase}\">{$signo} " . abs($v) . "%</span> vs. mes anterior";
+        };
+    @endphp
+
+    <h2 class="section-title">✦ Indicadores del negocio</h2>
+    <div class="kpis">
+        <div class="kpi">
+            <div class="titulo">📅 Citas este mes</div>
+            <div class="valor">{{ $k['citasMes'] }}</div>
+            <div class="detalle">{!! $flecha($k['variacionCitas']) !!}</div>
+        </div>
+        <div class="kpi verde">
+            <div class="titulo">💰 Ingresos del mes</div>
+            <div class="valor">${{ number_format($k['ingresosMes'], 0, ',', '.') }}</div>
+            <div class="detalle">{!! $flecha($k['variacionIngresos']) !!}</div>
+        </div>
+        <div class="kpi verde">
+            <div class="titulo">✅ Tasa de asistencia</div>
+            <div class="valor">{{ $k['tasaAsistencia'] }}%</div>
+            <div class="detalle">Citas pasadas que se completaron</div>
+        </div>
+        <div class="kpi rojo">
+            <div class="titulo">❌ Tasa de cancelación</div>
+            <div class="valor">{{ $k['tasaCancelacion'] }}%</div>
+            <div class="detalle">Del total de citas registradas</div>
+        </div>
+        <div class="kpi">
+            <div class="titulo">🧾 Ticket promedio</div>
+            <div class="valor">${{ number_format($k['ticketPromedio'], 0, ',', '.') }}</div>
+            <div class="detalle">Por cita completada este mes</div>
+        </div>
+        <div class="kpi azul">
+            <div class="titulo">🔁 Clientas recurrentes</div>
+            <div class="valor">{{ $k['clientasRecurrentes'] }}%</div>
+            <div class="detalle">{{ $k['clientasNuevasMes'] }} clientas nuevas este mes</div>
+        </div>
+        <div class="kpi azul">
+            <div class="titulo">📲 Recordatorios enviados</div>
+            <div class="valor">{{ $k['recordatoriosMes'] }}</div>
+            <div class="detalle">{{ $k['proximas7Dias'] }} citas en los próximos 7 días</div>
+        </div>
+        <div class="kpi amarillo">
+            <div class="titulo">⏳ Lista de espera</div>
+            <div class="valor">{{ $k['enListaEspera'] }}</div>
+            <div class="detalle">{{ $k['cuposRecuperados'] }} cupos recuperados</div>
+        </div>
+    </div>
+
+    <div class="graficas">
+        <div class="grafica ancha">
+            <h3>Citas por mes</h3>
+            <p>Últimos 6 meses, según su estado</p>
+            <div class="lienzo"><canvas id="gMeses"></canvas></div>
+        </div>
+        <div class="grafica">
+            <h3>Servicios más pedidos</h3>
+            <p>Top 5 (sin contar canceladas)</p>
+            <div class="lienzo"><canvas id="gServicios"></canvas></div>
+        </div>
+        <div class="grafica">
+            <h3>Citas por especialista</h3>
+            <p>Carga de trabajo del equipo</p>
+            <div class="lienzo"><canvas id="gEspecialistas"></canvas></div>
+        </div>
+        <div class="grafica">
+            <h3>Horas pico</h3>
+            <p>¿A qué hora llegan más clientas?</p>
+            <div class="lienzo"><canvas id="gHoras"></canvas></div>
+        </div>
+        <div class="grafica">
+            <h3>Días con más citas</h3>
+            <p>Para planear turnos del equipo</p>
+            <div class="lienzo"><canvas id="gDias"></canvas></div>
+        </div>
+    </div>
+
+    {{-- ═══════════ ⏳ LISTA DE ESPERA ═══════════ --}}
+    <h2 class="section-title">✦ Clientas en lista de espera</h2>
+    <table style="margin-bottom: 32px;">
+        <thead>
+            <tr>
+                <th>Clienta</th>
+                <th>Servicio</th>
+                <th>Especialista</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($listaEspera as $s)
+            <tr>
+                <td>{{ $s->user->name }}</td>
+                <td>{{ $s->servicio->nombre }}</td>
+                <td>{{ $s->especialista?->user->name ?? 'Cualquiera' }}</td>
+                <td>{{ \Carbon\Carbon::parse($s->fecha)->format('d/m/Y') }}</td>
+                <td>{{ $s->hora_texto }}</td>
+                <td>
+                    <span class="badge {{ $s->estado }}">
+                        {{ $s->estado === 'notificada' ? '📲 Avisada' : '⏳ Esperando' }}
+                    </span>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" style="text-align:center; color:#aaa; padding: 30px;">
+                    No hay clientas esperando cupo 💜
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
 
     <h2 class="section-title">✦ Accesos rápidos</h2>
     <div class="accesos">
@@ -198,5 +354,74 @@
     </table>
     <a href="{{ route('admin.citas') }}" class="ver-todas">✦ Ver todas las citas →</a>
 </div>
+
+{{-- 📊 Gráficas con Chart.js (se instala con npm y se compila con Vite: funciona sin internet) --}}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const datos = @json($resumen);
+    const morado = '#8b7bc4', lila = '#c9c2ee', verde = '#48bb78', amarillo = '#ecc94b', rojo = '#f56565';
+    const paleta = ['#6b5ca5', '#8b7bc4', '#a78bfa', '#c4b5fd', '#ddd6fe', '#f0abfc'];
+
+    if (window.Chart) {
+        Chart.defaults.font.family = 'Georgia, serif';
+        Chart.defaults.color = '#888';
+        Chart.defaults.plugins.legend.labels.boxWidth = 12;
+
+        const entero = { beginAtZero: true, ticks: { precision: 0 } };
+        const sinVacios = (id, valores) => {
+            if (valores.reduce((a, b) => a + b, 0) === 0) {
+                document.getElementById(id).parentElement.innerHTML = '<div class="sin-datos">Todavía no hay datos suficientes</div>';
+                return false;
+            }
+            return true;
+        };
+
+        new Chart(document.getElementById('gMeses'), {
+            type: 'bar',
+            data: {
+                labels: datos.citasPorMes.labels,
+                datasets: [
+                    { label: 'Completadas', data: datos.citasPorMes.completadas, backgroundColor: verde, borderRadius: 6 },
+                    { label: 'Pendientes',  data: datos.citasPorMes.pendientes,  backgroundColor: amarillo, borderRadius: 6 },
+                    { label: 'Canceladas',  data: datos.citasPorMes.canceladas,  backgroundColor: rojo, borderRadius: 6 },
+                ],
+            },
+            options: { maintainAspectRatio: false, scales: { x: { stacked: true }, y: { ...entero, stacked: true } } },
+        });
+
+        if (sinVacios('gServicios', datos.serviciosTop.valores)) {
+            new Chart(document.getElementById('gServicios'), {
+                type: 'doughnut',
+                data: { labels: datos.serviciosTop.labels, datasets: [{ data: datos.serviciosTop.valores, backgroundColor: paleta }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } },
+            });
+        }
+
+        if (sinVacios('gEspecialistas', datos.porEspecialista.valores)) {
+            new Chart(document.getElementById('gEspecialistas'), {
+                type: 'bar',
+                data: { labels: datos.porEspecialista.labels, datasets: [{ label: 'Citas', data: datos.porEspecialista.valores, backgroundColor: morado, borderRadius: 8 }] },
+                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: entero } },
+            });
+        }
+
+        if (sinVacios('gHoras', datos.horasPico.valores)) {
+            new Chart(document.getElementById('gHoras'), {
+                type: 'line',
+                data: { labels: datos.horasPico.labels, datasets: [{ label: 'Citas', data: datos.horasPico.valores, borderColor: morado, backgroundColor: 'rgba(201,194,238,.35)', fill: true, tension: .35, pointRadius: 3 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: entero } },
+            });
+        }
+
+        if (sinVacios('gDias', datos.diasSemana.valores)) {
+            new Chart(document.getElementById('gDias'), {
+                type: 'bar',
+                data: { labels: datos.diasSemana.labels, datasets: [{ label: 'Citas', data: datos.diasSemana.valores, backgroundColor: lila, hoverBackgroundColor: morado, borderRadius: 8 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: entero } },
+            });
+        }
+    }
+});
+</script>
 </body>
 </html>

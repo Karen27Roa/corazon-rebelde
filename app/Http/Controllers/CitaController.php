@@ -42,6 +42,13 @@ class CitaController extends Controller
             'telefono.regex'    => 'Escribe un celular válido de 10 dígitos, por ejemplo 3001234567.',
         ]);
 
+        // ⏰ No se puede agendar una hora que ya pasó (o con menos de 30 minutos de anticipación)
+        if (! Cita::horarioDisponibleEnElTiempo($request->fecha, $request->hora)) {
+            return back()
+                ->withErrors(['hora' => 'Esa hora ya pasó o está muy cerca. Elige una hora con al menos ' . Cita::MINUTOS_ANTICIPACION . ' minutos de anticipación.'])
+                ->withInput();
+        }
+
         // 🔒 Validar que no esté ocupada esa hora con esa especialista
         $citaExistente = Cita::where('especialista_id', $request->especialista_id)
             ->whereDate('fecha', $request->fecha)
@@ -148,6 +155,13 @@ class CitaController extends Controller
             'notas'           => 'nullable|string|max:300',
         ]);
 
+        // ⏰ No se puede agendar una hora que ya pasó (o con menos de 30 minutos de anticipación)
+        if (! Cita::horarioDisponibleEnElTiempo($request->fecha, $request->hora)) {
+            return back()
+                ->withErrors(['hora' => 'Esa hora ya pasó o está muy cerca. Elige una hora con al menos ' . Cita::MINUTOS_ANTICIPACION . ' minutos de anticipación.'])
+                ->withInput();
+        }
+
         // 🔒 Validar que no choque con otra cita
         $citaExistente = Cita::where('especialista_id', $request->especialista_id)
             ->whereDate('fecha', $request->fecha)
@@ -176,6 +190,8 @@ class CitaController extends Controller
             'notas'           => $request->notas,
             'estado'          => 'pendiente',
             'google_event_id' => null,
+            // nueva fecha → se debe enviar un nuevo recordatorio
+            'recordatorio_enviado_at' => null,
         ]);
 
         // 🔔 Nuevo correo, evento de calendario y WhatsApp (marcado como reagendamiento)

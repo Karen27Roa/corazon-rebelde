@@ -164,6 +164,10 @@
         .back { display: block; text-align: center; margin-top: 16px; color: #6b5ca5; font-size: 14px; text-decoration: none; }
         .back:hover { text-decoration: underline; }
 
+        .info { background: #e0ecff; color: #1d4ed8; padding: 10px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; font-weight: bold; }
+        .espera-aviso { background: #f5f0ff; color: #6b5ca5; padding: 12px 14px; border-radius: 12px; margin: 4px 0 10px; font-size: 13px; line-height: 1.5; }
+        .espera-aviso a { color: #6a3fb5; font-weight: bold; }
+        .espera-aviso.lleno { background: #fff3cd; color: #856404; }
         .error { background: #ffe0e0; color: #c0392b; padding: 10px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; }
 
         .hora-ocupada-msg {
@@ -210,6 +214,9 @@
         @if($errors->any())
             <div class="error">{{ $errors->first() }}</div>
         @endif
+        @if(session('info'))
+            <div class="info">{{ session('info') }}</div>
+        @endif
 
         <form method="POST" action="{{ route('citas.store') }}">
             @csrf
@@ -219,7 +226,7 @@
                 <select name="servicio_id" required>
                     <option value="">Selecciona un servicio</option>
                     @foreach($servicios as $servicio)
-                        <option value="{{ $servicio->id }}" {{ old('servicio_id') == $servicio->id ? 'selected' : '' }}>
+                        <option value="{{ $servicio->id }}" {{ old('servicio_id', request('servicio_id')) == $servicio->id ? 'selected' : '' }}>
                             {{ $servicio->nombre }} — ${{ number_format($servicio->precio, 0, ',', '.') }}
                         </option>
                     @endforeach
@@ -231,7 +238,7 @@
                 <select name="especialista_id" id="especialista_id" required>
                     <option value="">Selecciona una especialista</option>
                     @foreach($especialistas as $especialista)
-                        <option value="{{ $especialista->id }}" {{ old('especialista_id') == $especialista->id ? 'selected' : '' }}>
+                        <option value="{{ $especialista->id }}" {{ old('especialista_id', request('especialista_id')) == $especialista->id ? 'selected' : '' }}>
                             {{ $especialista->user->name }}
                         </option>
                     @endforeach
@@ -240,7 +247,7 @@
 
             <div class="form-group">
                 <label>📅 Fecha</label>
-                <input type="date" name="fecha" id="fecha" min="{{ date('Y-m-d') }}" value="{{ old('fecha') }}" required>
+                <input type="date" name="fecha" id="fecha" min="{{ \App\Models\Cita::fechaMinima() }}" value="{{ old('fecha', request('fecha')) }}" required>
             </div>
 
             <div class="form-group">
@@ -271,6 +278,12 @@
                 @error('telefono')
                     <div class="campo-error">{{ $message }}</div>
                 @enderror
+            </div>
+
+            <div class="espera-aviso" id="espera-aviso">
+                ⏳ ¿No encuentras un horario que te sirva?
+                <a href="{{ route('lista-espera.index') }}" id="link-espera">Únete a la lista de espera</a>
+                y te avisamos por WhatsApp si se libera un cupo.
             </div>
 
             <button type="submit" class="btn" id="btn-submit">✦ Agendar cita</button>
@@ -312,6 +325,11 @@
     const selectHora = document.getElementById('hora');
     const horaError = document.getElementById('hora-error');
     const btnSubmit = document.getElementById('btn-submit');
+    const esperaAviso = document.getElementById('espera-aviso');
+    const linkEspera = document.getElementById('link-espera');
+    const urlEspera = linkEspera.getAttribute('href');
+    // Hora que viene del enlace de WhatsApp (lista de espera) o de un intento anterior
+    let horaInicial = @json(old('hora', request('hora')));
 
     const todasLasHoras = [
         '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
@@ -320,6 +338,13 @@
         '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
         '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'
     ];
+
+    // ⏰ Reglas de horario que manda el servidor (hora de Colombia)
+    const HOY = @json(today()->toDateString());
+    const HORA_LIMITE_HOY = @json(\App\Models\Cita::limiteReserva()->isToday() ? \App\Models\Cita::limiteReserva()->format('H:i') : '99:99');
+    // En el día de hoy solo se muestran las horas que todavía no pasan
+    const horasDelDia = (fecha) => fecha === HOY ? todasLasHoras.filter(h => h >= HORA_LIMITE_HOY) : todasLasHoras;
+
 
     function formatearHora(hora24) {
         const [h, m] = hora24.split(':');
@@ -375,7 +400,14 @@
             .then(horasOcupadas => {
                 selectHora.innerHTML = '<option value="">Selecciona una hora</option>';
 
-                todasLasHoras.forEach(hora => {
+                const horas = horasDelDia(fecha);
+
+                if (horas.length === 0) {
+                    selectHora.innerHTML = '<option value="">Ya no hay horarios hoy, elige otro día</option>';
+                    return;
+                }
+
+                horas.forEach(hora => {
                     const option = document.createElement('option');
                     option.value = hora;
 
@@ -389,6 +421,22 @@
                     selectHora.appendChild(option);
                 });
 
+                // Preselecciona la hora que venía en el enlace, si sigue libre
+                if (horaInicial && !horasOcupadas.includes(horaInicial)) {
+                    selectHora.value = horaInicial;
+                }
+                horaInicial = null;
+
+                // Si el día está lleno, invita a la lista de espera con los datos ya elegidos
+                const servicioId = document.querySelector('select[name=servicio_id]').value;
+                const params = new URLSearchParams({ fecha, especialista_id: especialistaId, servicio_id: servicioId });
+                linkEspera.href = `${urlEspera}?${params}`;
+                const libres = horas.filter(h => !horasOcupadas.includes(h)).length;
+                esperaAviso.classList.toggle('lleno', libres === 0);
+                if (libres === 0) {
+                    selectHora.innerHTML = '<option value="">No hay horas libres este día 😢</option>';
+                }
+
                 validarHoraSeleccionada();
             })
             .catch(() => {
@@ -399,6 +447,11 @@
     especialistaSelect.addEventListener('change', cargarHoras);
     fechaInput.addEventListener('change', cargarHoras);
     selectHora.addEventListener('change', validarHoraSeleccionada);
+
+    // Si la página abre con fecha y especialista (enlace de la lista de espera), carga las horas
+    if (fechaInput.value && especialistaSelect.value) {
+        cargarHoras();
+    }
 
     /* ---------- El celular solo acepta números ---------- */
     document.getElementById('telefono').addEventListener('input', function () {

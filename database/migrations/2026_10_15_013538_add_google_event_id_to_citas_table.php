@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // La columna ya la puede haber creado la migración add_campos_notificaciones
+        if (Schema::hasColumn('citas', 'google_event_id')) {
+            return;
+        }
+
         Schema::table('citas', function (Blueprint $table) {
             $table->string('google_event_id')->nullable()->after('notas');
         });
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('citas', function (Blueprint $table) {
-            $table->dropColumn('google_event_id');
-        });
+        // No hace nada: la columna la elimina add_campos_notificaciones al revertirse.
     }
 };

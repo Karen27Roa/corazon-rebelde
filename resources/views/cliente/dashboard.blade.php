@@ -232,6 +232,7 @@
     <div class="nav-links">
         <a href="{{ route('citas.create') }}">✦ Agendar cita</a>
         <a href="{{ route('citas.mias') }}">✦ Mis citas</a>
+        <a href="{{ route('lista-espera.index') }}">✦ Lista de espera</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn-logout">Cerrar sesión</button>

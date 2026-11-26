@@ -1,0 +1,62 @@
+# Integración continua: cada vez que se sube código a GitHub (push) o se abre un Pull Request,
+# GitHub instala el proyecto en un servidor limpio, corre todas las pruebas automáticas
+# y compila los estilos. Si algo falla, aparece una ❌ en el repositorio.
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pruebas:
+    name: Pruebas PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, bcmath, zip, gd, pdo_sqlite, sqlite3
+          coverage: none
+
+      - name: Usar caché de Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+
+      - name: Instalar dependencias PHP
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Preparar el archivo .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Correr las pruebas automáticas
+        run: php artisan test
+
+  estilos:
+    name: Compilar estilos (Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build

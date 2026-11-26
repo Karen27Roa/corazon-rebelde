@@ -183,7 +183,7 @@
                 name="fecha"
                 id="fecha"
                 value="{{ \Carbon\Carbon::parse($cita->fecha)->format('Y-m-d') }}"
-                min="{{ date('Y-m-d') }}"
+                min="{{ \App\Models\Cita::fechaMinima() }}"
                 required
             >
         </div>
@@ -231,6 +231,13 @@
         '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
         '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'
     ];
+
+    // ⏰ Reglas de horario que manda el servidor (hora de Colombia)
+    const HOY = @json(today()->toDateString());
+    const HORA_LIMITE_HOY = @json(\App\Models\Cita::limiteReserva()->isToday() ? \App\Models\Cita::limiteReserva()->format('H:i') : '99:99');
+    // En el día de hoy solo se muestran las horas que todavía no pasan
+    const horasDelDia = (fecha) => fecha === HOY ? todasLasHoras.filter(h => h >= HORA_LIMITE_HOY) : todasLasHoras;
+
 
     function formatearHora(hora24) {
         const [h, m] = hora24.split(':');
@@ -280,7 +287,14 @@
             .then(horasOcupadas => {
                 selectHora.innerHTML = '<option value="">Selecciona una hora</option>';
 
-                todasLasHoras.forEach(hora => {
+                const horas = horasDelDia(fecha);
+
+                if (horas.length === 0) {
+                    selectHora.innerHTML = '<option value="">Ya no hay horarios hoy, elige otro día</option>';
+                    return;
+                }
+
+                horas.forEach(hora => {
                     const option = document.createElement('option');
                     option.value = hora;
 

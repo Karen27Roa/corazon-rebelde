@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Mail\CitaAgendadaMail;
 use App\Models\Cita;
+use App\Models\ListaEspera;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -96,6 +97,51 @@ class CitaNotificador
             . "Fecha: {$fecha}\n"
             . "Hora: {$hora}\n\n"
             . "Cuando quieras, agenda una nueva cita en nuestra página."
+        );
+    }
+
+    /**
+     * Recordatorio a la clienta el día antes de su cita.
+     * Devuelve true solo si el WhatsApp salió, para poder reintentarlo después.
+     */
+    public function recordatorio(Cita $cita): bool
+    {
+        $cita->loadMissing(['user', 'servicio', 'especialista.user']);
+
+        $cuando = $cita->inicio->isToday() ? 'hoy' : 'mañana';
+        $hora   = $cita->inicio->format('h:i A');
+
+        return $this->whatsapp->enviar(
+            $cita->user->telefono,
+            "Hola {$cita->user->name} 💜\n"
+            . "Te recordamos tu cita de {$cuando} ⏰\n\n"
+            . "Servicio: {$cita->servicio->nombre}\n"
+            . "Especialista: {$cita->especialista->user->name}\n"
+            . "Fecha: {$cita->inicio->format('d/m/Y')}\n"
+            . "Hora: {$hora}\n\n"
+            . "Si no puedes asistir, cancela o reagenda desde la página para que otra clienta pueda usar el horario 🙏\n"
+            . route('citas.mias')
+        );
+    }
+
+    /**
+     * Aviso a una clienta de la lista de espera: se liberó un horario que le sirve.
+     */
+    public function horarioDisponible(ListaEspera $solicitud, Cita $citaLiberada, string $enlace): bool
+    {
+        $solicitud->loadMissing(['user', 'servicio']);
+        $citaLiberada->loadMissing('especialista.user');
+
+        return $this->whatsapp->enviar(
+            $solicitud->telefono ?: $solicitud->user->telefono,
+            "Hola {$solicitud->user->name} 💜\n"
+            . "¡Se liberó un horario que estabas esperando! 🎉\n\n"
+            . "Servicio: {$solicitud->servicio->nombre}\n"
+            . "Especialista: {$citaLiberada->especialista->user->name}\n"
+            . "Fecha: {$citaLiberada->inicio->format('d/m/Y')}\n"
+            . "Hora: {$citaLiberada->inicio->format('h:i A')}\n\n"
+            . "Agéndalo antes de que otra clienta lo tome 👇\n"
+            . "👉 {$enlace}"
         );
     }
 

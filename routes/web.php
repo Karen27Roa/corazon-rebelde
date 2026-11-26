@@ -6,6 +6,7 @@ use App\Http\Controllers\EspecialistaController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\CitaCancelacionController; // 🆕
+use App\Http\Controllers\ListaEsperaController;
 use App\Http\Middleware\SoloAdmin;
 
 /*
@@ -67,6 +68,10 @@ Route::post('/citas/{cita}/cancelar-correo', [CitaCancelacionController::class, 
 */
 Route::middleware(['auth'])->group(function () {
 
+    // Ruta genérica que usan las pantallas de Breeze (verificar correo, confirmar contraseña):
+    // envía a cada usuario a su panel según su rol.
+    Route::get('/dashboard', fn () => redirect('/'))->name('dashboard');
+
     // =========================
     // Rutas del cliente
     // =========================
@@ -83,6 +88,12 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/cliente/citas/{cita}/cancelar', [CitaController::class, 'cancelar'])->name('citas.cancelar');
 
     Route::get('/api/horas-ocupadas', [CitaController::class, 'horasOcupadas'])->name('horas.ocupadas');
+
+    // ⏳ Lista de espera inteligente
+    Route::get('/cliente/lista-espera', [ListaEsperaController::class, 'index'])->name('lista-espera.index');
+    Route::post('/cliente/lista-espera', [ListaEsperaController::class, 'store'])->name('lista-espera.store');
+    Route::delete('/cliente/lista-espera/{listaEspera}', [ListaEsperaController::class, 'destroy'])->name('lista-espera.destroy');
+    Route::get('/cupo/{listaEspera}', [ListaEsperaController::class, 'cupo'])->name('lista-espera.cupo');
 
 
     // =========================
